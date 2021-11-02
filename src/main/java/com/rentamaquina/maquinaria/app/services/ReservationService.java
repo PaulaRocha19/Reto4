@@ -5,9 +5,15 @@
  */
 package com.rentamaquina.maquinaria.app.services;
 
+import com.rentamaquina.maquinaria.app.entities.ContadorClientes;
 import com.rentamaquina.maquinaria.app.entities.Reservation;
+import com.rentamaquina.maquinaria.app.entities.StatusReservas;
 import com.rentamaquina.maquinaria.app.repositories.ReservationRepository;
+import java.util.Date;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.List;
+import java.util.ArrayList;
 import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -36,7 +42,6 @@ public class ReservationService {
      */
     public Optional<Reservation> getReservation(Integer reservationId){
         return repository.getReservation(reservationId);
-    
     }
     
      /**
@@ -84,8 +89,6 @@ public class ReservationService {
             return reservation;
         }
     }
-      
-    
     
     /** 
      * Delete
@@ -98,4 +101,33 @@ public class ReservationService {
         }).orElse(false);
         return aBoolean;
     }
+    
+    public StatusReservas reporteStatusServicio (){
+        List<Reservation>completed= repository.ReservacionStatusRepositorio("completed");
+        List<Reservation>cancelled= repository.ReservacionStatusRepositorio("cancelled");
+        
+        return new StatusReservas(completed.size(), cancelled.size() );
+    }
+    
+    public List<Reservation> reporteTiempoServicio (String datoA, String datoB){
+        SimpleDateFormat parser = new SimpleDateFormat ("yyyy-MM-dd");
+        
+        Date datoUno = new Date();
+        Date datoDos = new Date();
+        
+        try{
+             datoUno = parser.parse(datoA);
+             datoDos = parser.parse(datoB);
+        }catch(ParseException evt){
+            evt.printStackTrace();
+        }if(datoUno.before(datoDos)){
+            return repository.ReservacionTiempoRepositorio(datoUno, datoDos);
+        }else{
+            return new ArrayList<>();
+        
+        } 
+    } 
+    public List<ContadorClientes> reporteClientesServicio(){
+            return repository.getClientesRepositorio();
+    }  
 }
